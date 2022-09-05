@@ -50,7 +50,7 @@ def add_to_cart(request, slug):
 		if order.items.filter(item__slug=item.slug).exists():
 			order_item.quantity += 1
 			order_item.save()
-			messages.info(request, "The quantity of this item was updated")
+			messages.success(request, "The quantity of this item was updated")
 		else:
 			messages.info(request, "This item was added to your cart")
 			order.items.add(order_item)
@@ -59,7 +59,7 @@ def add_to_cart(request, slug):
 		order = Order.objects.create(user = request.user, ordered_date = ordered_date)
 		order.items.add(order_item)
 
-	return redirect (reverse('product', kwargs={'slug':slug}))
+	return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
 
 
 
@@ -73,17 +73,17 @@ def remove_from_cart(request, slug):
 			order_item = OrderItem.objects.filter(item = item,
 				user = request.user, ordered = False)[0]
 			order.items.remove(order_item)
-			messages.info(request, "You have removed an item from your cart")
+			messages.warning(request, "You have removed an item from your cart")
 		else:
 			#Add a message saying the order doesnt contain that item
 			messages.info(request, "This order doesn't contain the item")
-			return redirect (reverse('product', kwargs={'slug':slug}))
+			return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
 
 
 	else:
 		#Add a message saying the user doesnt have an order
 		messages.info(request, "You do not have an order of this product")
-		return redirect (reverse('product', kwargs={'slug':slug}))
+		return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
 
 
-	return redirect (reverse('product', kwargs={'slug':slug}))
+	return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
