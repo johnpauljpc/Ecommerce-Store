@@ -54,3 +54,6 @@ class Order(models.Model):
 
 	def __str__(self):
 		return self.user.username
+
+	def get_absolute_url(self):
+		return reverse("order-summary", kwargs={'pk':self.id})

@@ -1,7 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin 
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from .models import Item, OrderItem, Order
-from django.views.generic import DetailView, ListView
+from django.views.generic import (DetailView,
+View, ListView)
 from django.urls import reverse
 from django.utils import timezone
 
@@ -28,17 +32,34 @@ def home(request):
 
 class HomeView(ListView):
 	model = Item
-	paginate_by = 1
+	paginate_by = 2
 	context_object_name = 'products'
 	template_name = 'home-page.html'
 
+class OrderSummaryView(LoginRequiredMixin, View):
+	#model = Order
+	#context_object_name = 'orders'
+	#template_name = 'order_summary.html'
+
+	def get(self, *args, **kwargs):
+
+		try:
+			order = Order.objects.get(user = self.request.user, ordered = False )
+			context = {
+                'object': order
+            }
+			return render(self.request, 'order_summary.html', context)
+		except ObjectDoesNotExist:
+			messages.error(request, "You do not have an active order")
+			return redirect('/')
+		return render(self.request, 'order_summary.html')
 
 class ItemDetailView(DetailView):
 	model = Item
 	context_object_name = 'products'
 	template_name = 'product-page.html'
 
-
+@login_required
 def add_to_cart(request, slug):
 
 	item = get_object_or_404(Item, slug = slug)
@@ -63,7 +84,7 @@ def add_to_cart(request, slug):
 	return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
 
 
-
+@login_required
 def remove_from_cart(request, slug):
 	item = get_object_or_404(Item, slug = slug)
 	order_qs = Order.objects.filter(user = request.user, ordered = False)
