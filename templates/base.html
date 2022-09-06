@@ -1,7 +1,13 @@
+{% load crispy_forms_tags%}
 {%load static%}
 <!DOCTYPE html>
 <html>
 <head>
+    <title>{% block head_title %}{% endblock %}</title>
+    {% block extra_head %}
+    {% endblock %}
+  
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -60,9 +66,15 @@
 {% endfor %}
 {% endif %}
 <body>
+
+<div class="container">
 {% block content %}
 
 {% endblock content %}
+</div>
+
+{% block extra_body %}
+{% endblock %}
 
 {% include 'footer.html' %}
 
@@ -83,5 +95,7 @@
     new WOW().init();
 
   </script>
+
+
 </body>
 </html>

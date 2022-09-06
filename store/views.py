@@ -28,6 +28,7 @@ def home(request):
 
 class HomeView(ListView):
 	model = Item
+	paginate_by = 1
 	context_object_name = 'products'
 	template_name = 'home-page.html'
 
@@ -87,3 +88,5 @@ def remove_from_cart(request, slug):
 
 
 	return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
+
+
