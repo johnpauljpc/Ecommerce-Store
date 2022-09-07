@@ -51,6 +51,15 @@ class OrderItem(models.Model):
 		total = (self.quantity) * (self.item.discount_price)
 		return total
 
+	def amount_saved(self):
+		saved = self.get_total_item_price() - self.get_total_item_discount_price()
+		return saved
+
+	def get_precise_total(self):
+		if  self.item.discount_price:
+			return self.get_total_item_discount_price()
+		return self.get_total_item_price()
+
 
 class Order(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -65,4 +74,10 @@ class Order(models.Model):
 
 	def get_absolute_url(self):
 		return reverse("order-summary", kwargs={'pk':self.id})
+
+	def order_total(self):
+		total = 0
+		for order_item in self.items.all():
+			total += order_item.get_precise_total()
+		return total
 

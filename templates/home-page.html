@@ -94,12 +94,14 @@
                   </strong>
                 </h5>
 
-                <h4 class="font-weight-bold blue-text">
+                <div class=" blue-text">
                   {% if product.discount_price %}
-                <del>${{product.discount_price}}</del>
-                {% endif %}
-                  <strong>{{product.price}}$</strong>
-                </h4>
+                &#8358;</font><del>{{product.price}}</del>
+                  <strong>&#8358;{{product.discount_price}}</strong>
+                  {% else %}
+                  <strong>&#8358;{{product.price}}</strong>
+                  {% endif %}
+                </div>
 
               </div>
               <!--Card content-->

@@ -25,17 +25,40 @@
       <tr>
         <td scope="col"><b>{{forloop.counter}}</b></td>
         <td>{{order_item.item.title}}</td>
-        <td>{{order_item.item.price}}</td>
-        <td>{{order_item.quantity}}</td>
-       <td> {{order_item.get_total_item_price}}</td>
+        <td>&#8358;{{order_item.item.price}}</td>
+        <td>
+         <a href="{% url 'remove-single-item' order_item.item.slug%}"> <li class="fas fa-minus mr-2"></li></a>{{order_item.quantity}}
+         <a href="{% url 'add-to-cart' order_item.item.slug%}"><li class="fas fa-plus ml-2"></li></a>
+         </td>
+       <td> 
+        {% if order_item.item.discount_price %}
         
+       &#8358;{{order_item.get_total_item_discount_price}}<span class=" ml-2 badge red"> saving &#8358;{{order_item.amount_saved}}</span>
+       {%else%}
+       &#8358;{{order_item.get_total_item_price}}
+       {%endif%}
+     <a href="{% url 'remove-from-cart' order_item.item.slug%}"> <li class=" text-danger fas fa-trash float-right"></li></a>
+   </td>
        
       </tr>
       {% endfor %}
+      <tr>
+        
+        <td colspan="4" class="text-weight-bold"><strong>Total</strong></td>
+        <td><strong class="text-weight-bold">&#8358;{{object.order_total}}</strong></td>
+      
+      </tr>
+      <tr>
+        <td colspan="5" class="text-center">
+          <a class=" btn btn-default mr-2 " href="{% url 'checkout' %}"><li class="fas ">&#xf291;</li> Continue shopping<li class="fas ml-1 ">&#xf290;</li>   </a>
+
+          <a class=" btn btn-warning ml-2" href="{% url 'checkout' %}"><li class="fas mr-1 "> &#xf2b5; </li>Proceed to Checkout <li class="fas mr-1 "> &#xf2b5; </li> </a>
+        </td>
+      </tr>
 
     </tbody>
   </table>
-
+&#xf291;
 </div>
 
 {% endblock content %}

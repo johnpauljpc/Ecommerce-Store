@@ -81,7 +81,7 @@ def add_to_cart(request, slug):
 		order = Order.objects.create(user = request.user, ordered_date = ordered_date)
 		order.items.add(order_item)
 
-	return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
+	return redirect ('order-summary')
 
 
 @login_required
@@ -99,15 +99,49 @@ def remove_from_cart(request, slug):
 		else:
 			#Add a message saying the order doesnt contain that item
 			messages.info(request, "This order doesn't contain the item")
-			return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
+			return redirect ('order-summary')
 
 
 	else:
 		#Add a message saying the user doesnt have an order
 		messages.info(request, "You do not have an order of this product")
-		return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
+		return redirect ('order-summary')
 
 
 	return redirect (reverse('product', kwargs={'slug':slug}), {'messages':messages})
 
+
+@login_required
+def remove_single_item_from_cart(request, slug):
+	item = get_object_or_404(Item, slug = slug)
+	order_qs = Order.objects.filter(user = request.user, ordered = False)
+	if order_qs.exists():
+		order = order_qs[0]
+		# chwck if the order item is in the order
+		if order.items.filter(item__slug=item.slug).exists():
+			order_item = OrderItem.objects.filter(item = item,
+				user = request.user, ordered = False)[0]
+			#order.items.remove(order_item)
+			if order_item.quantity > 1:
+				order_item.quantity -= 1
+				order_item.save()
+			else:
+				order_item.delete()
+				# or order.items.remove(order_item)
+
+			messages.warning(request, "quantity of item has been reduced from your cart")
+			return redirect ('order-summary' )
+		else:
+			#Add a message saying the order doesnt contain that item
+			messages.info(request, "This order doesn't contain the item") 
+			return redirect ('order-summary' )
+
+
+	else:
+		#Add a message saying the user doesnt have an order
+		messages.info(request, "You do not have an order of this product")
+		return redirect('order-summary')
+
+
+	
 
