@@ -3,10 +3,12 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from .models import Item, OrderItem, Order
+from .models import Item, OrderItem, Order, BillingAddress
 from django.views.generic import (DetailView,
 View, ListView)
+from .forms import CheckoutForm
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 
 # Create your views here.
@@ -16,12 +18,35 @@ def products(request):
 
 	return render(request,'product-page.html', context)
 
+#@login_required
+class checkout(LoginRequiredMixin, View):
+	def get(self, *args, **kwargs):#or exclude request
+		form = CheckoutForm()
+		return render(self.request, 'checkout-page.html', {'form': form})
+		messages.info(self.request, 'Sucessfully submitted')
+	def post(self,  *args, **kwargs):
+		form = CheckoutForm(self.request.POST or None)#or None
+		print(self.request.POST)
+		if form.is_valid():
 
-def checkout(request):
+			street_address   = form.cleaned_data.get('street_address')
+			appartment_address  = form.cleaned_data.get('appartment_address')
+			zipcode  = form.cleaned_data.get('zipcode')
+			same_billing_address  = form.cleaned_data.get('same_billing_address')
+			save_info  = form.cleaned_data.get('save_info')
+			payment_option  = form.cleaned_data.get('payment_option')
 
-	context = {}
 
-	return render(request, 'checkout-page.html', context)
+			messages.info(self.request, 'Sucessfully submitted')
+			print(form.cleaned_data)
+			print('the form is valid')
+			return redirect('checkout')
+		messages.warning(self.request, 'Failed to checkout')
+		return render(self.request, 'checkout-page.html',  {'form': form})
+
+	
+
+	
 
 
 def home(request):
@@ -33,6 +58,7 @@ def home(request):
 class HomeView(ListView):
 	model = Item
 	paginate_by = 2
+	ordering = ['id']
 	context_object_name = 'products'
 	template_name = 'home-page.html'
 
