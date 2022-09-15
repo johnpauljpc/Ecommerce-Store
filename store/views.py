@@ -23,26 +23,65 @@ class checkout(LoginRequiredMixin, View):
 	def get(self, *args, **kwargs):#or exclude request
 		form = CheckoutForm()
 		return render(self.request, 'checkout-page.html', {'form': form})
-		messages.info(self.request, 'Sucessfully submitted')
+		#messages.info(self.request, 'Sucessfully submitted')
 	def post(self,  *args, **kwargs):
 		form = CheckoutForm(self.request.POST or None)#or None
-		print(self.request.POST)
-		if form.is_valid():
+		try:
+			order = Order.objects.get(user = self.request.user, ordered = False )
 
-			street_address   = form.cleaned_data.get('street_address')
-			appartment_address  = form.cleaned_data.get('appartment_address')
-			zipcode  = form.cleaned_data.get('zipcode')
-			same_billing_address  = form.cleaned_data.get('same_billing_address')
-			save_info  = form.cleaned_data.get('save_info')
-			payment_option  = form.cleaned_data.get('payment_option')
+			if form.is_valid():
+
+				street_address   = form.cleaned_data.get('street_address')
+				appartment_address  = form.cleaned_data.get('appartment_address')
+				country  = form.cleaned_data.get('country')
+				zipcode  = form.cleaned_data.get('zipcode')
+				#TODO -> Add functionality for these fields
+				#same_shipping_address  = form.cleaned_data.get('same_shipping_address')
+				#save_info  = form.cleaned_data.get('save_info')
+				payment_option  = form.cleaned_data.get('payment_option')
+
+				billing_address = BillingAddress(
+					user = self.request.user,
+					street_address = street_address,
+					appartment_address = appartment_address,
+					country = country,
+					zipcode = zipcode
 
 
-			messages.info(self.request, 'Sucessfully submitted')
-			print(form.cleaned_data)
-			print('the form is valid')
+					)
+				billing_address.save()
+				order.billing_address = billing_address
+				order.save()
+				#  TODO: add a redirect to the selected payment option
+				return redirect('checkout')
+			messages.warning(self.request, 'Failed to checkout')
 			return redirect('checkout')
-		messages.warning(self.request, 'Failed to checkout')
-		return render(self.request, 'checkout-page.html',  {'form': form})
+			#return render(self.request, 'checkout-page.html',  {'form': form})
+			
+			#return render(self.request, 'order_summary.html', context)
+		except ObjectDoesNotExist:
+			messages.error(request, "You do not have an active order")
+			return redirect('order-summary')
+
+
+		#print(self.request.POST)
+		
+
+
+			#messages.info(self.request, 'Sucessfully submitted')
+			#print(form.cleaned_data)
+			# print('the form is valid')
+			
+class PaymentView(View):
+
+	def get(self, *args, **kwargs):
+
+		return render(self.request, 'payment.html')
+
+	def post(self, *args, **kwargs):
+		return render(self.request, 'payment.html')
+
+
 
 	
 
